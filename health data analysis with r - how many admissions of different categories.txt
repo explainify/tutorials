@@ -1,0 +1,193 @@
+::: new_page(title="Introduction to Health Register Data with R")
+::: write
+## Lecture 1: What diagnoses are most common in hospitals?
+
+::: write_speak
+Welcome! Today we dive into the world of **Health Registries**. These are massive databases that track every interaction a patient has with a hospital. 
+
+Our core question for this session: **What diagnoses account for most hospital admissions in a given year?**
+
+::: write
+### The Dataset: `hospital_data`
+We will work with a simulated registry. Each row represents a single **admission event**.
+
+::: webr(silent=true)
+# Creating a mid-sized artificial dataset for our analysis
+set.seed(42)  # Make random numbers reproducible
+n_rows <- 2000  # Number of admission records to create
+hospital_data <- data.frame(
+  patient_id = sample(100:500, n_rows, replace = TRUE),
+  admission_date = as.Date('2023-01-01') + sample(0:364, n_rows, replace = TRUE),
+  icd10 = sample(c("I21.9", "E11.9", "J44.1", "I50.0", "M16.9", "Z38.0", "S72.0"), n_rows, replace = TRUE),
+  sex = sample(c("Male", "Female"), n_rows, replace = TRUE),
+  age = sample(0:95, n_rows, replace = TRUE)
+)  # Build a table with patient IDs, dates, diagnoses (ICD-10), sex, and age
+
+:::
+Let us assume you have loaded some data called hosital_data
+::: webr
+# Show the first few rows
+head(hospital_data) # Displays the top 6 rows of the dataset
+:::
+
+::: write_speak
+### New to R? A quick syntax guide
+If you have never used R, we will learn the basics by doing a few small calculations on `hospital_data`.
+
+**Assignment (`<-`):** We use the arrow to store results in named objects that we can re-use later.
+
+**Accessing columns with `$`:** `hospital_data$age` means "take the `age` column from the `hospital_data` table".
+
+**Functions:** Things like `mean()`, `nrow()` and `table()` are functions — they take data as input and return a result.
+
+**Comments (`#`):** Anything after `#` is a comment — R ignores it. We use comments to explain what the code does.
+:::
+
+::: webr
+# How many rows (admissions) do we have in total?
+num_admissions <- nrow(hospital_data)        # nrow() counts rows in a data frame
+
+# What is the average age of admitted patients?
+mean_age <- mean(hospital_data$age)          # $ picks the 'age' column from hospital_data
+
+# How many admissions are Male vs Female?
+sex_counts <- table(hospital_data$sex)       # table() counts how often each value appears
+
+# Look at the results in the console
+num_admissions                               # Print the total number of admissions
+mean_age                                     # Print the mean age
+sex_counts                                   # Print the counts by sex
+:::
+
+::: write_speak
+### Step 1: First look at the data
+Before we calculate anything, we need to understand the "grain" of the data. In a health registry, **one row usually equals one admission**.
+
+Let's check how many admissions and unique patients we have.
+
+::: webr
+# Counting total admissions
+total_admissions <- nrow(hospital_data)  # nrow counts the number of rows in the data
+print(paste("Total Admissions:", total_admissions))  # Display the result as text
+
+# Counting unique patients
+unique_patients <- length(unique(hospital_data$patient_id))  # unique() finds distinct IDs
+print(paste("Unique Patients:", unique_patients))  # Display the result
+:::
+
+::: question
+If the number of admissions (2000) is higher than the number of unique patients (401), what does that tell us?
+* Some patients were admitted more than once.
+- The data contains errors.
+- Each patient has exactly one diagnosis.
+- The hospital is over capacity.
+
+
+::: write_speak
+### Step 2: Counting Diagnoses
+In health data, diseases are recorded using **ICD-10 codes** (International Classification of Diseases, 10th Revision). 
+
+Let's see which specific codes appear most frequently in our registry.
+
+::: webr
+# Creating a frequency table of the ICD-10 codes
+diag_counts <- table(hospital_data$icd10)  # table() counts occurrences of each value
+diag_counts_sorted <- sort(diag_counts, decreasing = TRUE)  # sort() puts highest counts first
+
+print(diag_counts_sorted)  # Show which diagnoses are most common
+:::
+
+::: write_speak
+### Step 3: The Problem of "Too Much Detail"
+Real hospital data contains thousands of unique ICD-10 codes. If we try to plot all of them, the result is a mess. 
+
+We need **aggregation**. We need to group specific diseases (like "Type 2 diabetes") into broader categories (like "Endocrine diseases").
+
+::: write
+### Step 4: ICD-10 Structure
+ICD-10 codes are hierarchical:
+* **Full code:** `E11.9` (Type 2 diabetes without complications)
+* **Category:** `E11` (Type 2 diabetes mellitus)
+* **Chapter:** `E` (Endocrine, nutritional and metabolic diseases)
+
+::: write_speak
+### Step 5: Aggregating to Chapters
+By extracting just the **first letter** of the code, we can see the "big picture" of hospital activity.
+
+::: webr
+# Extract the first letter to get the ICD Chapter
+hospital_data$chapter <- substr(hospital_data$icd10, 1, 1)  # substr() takes the 1st character
+
+# Count admissions per chapter
+chapter_counts <- as.data.frame(table(hospital_data$chapter))  # table() gives counts; as.data.frame turns it into a table
+colnames(chapter_counts) <- c("Chapter", "Admissions")  # Give the columns clearer names
+
+print(chapter_counts)  # Show the counts per chapter
+:::
+
+::: write_speak
+### Step 6: Labelling for Readability
+A table full of letters like "I", "E", and "J" isn't helpful for a report. We should join our data with a "Lookup Table" to add human-readable names.
+
+
+
+::: webr
+# Create a simple lookup table for our specific codes
+lookup <- data.frame(
+  Chapter = c("E", "I", "J", "M", "S", "Z"),
+  Label = c("Endocrine", "Circulatory", "Respiratory", "Musculoskeletal", "Injury", "Births")
+)  # Maps each chapter letter to a readable disease-group name
+
+# Merge the labels into our count table
+final_table <- merge(chapter_counts, lookup, by = "Chapter")  # merge() combines two dataframes by matching the Chapter column
+
+print(final_table)  # Show the final table with human-readable labels
+:::
+
+::: write_speak
+### Step 7: Visualizing the Results
+Now we can produce a clear bar plot. Notice how we reorder the bars so the most frequent diagnosis is at the top—this makes the plot much easier to read at a glance.
+
+::: webr
+# Create a bar plot
+library(ggplot2) # Load the visualization library
+
+ggplot(final_table, aes(x = reorder(Label, Admissions), y = Admissions)) +
+  geom_bar(stat = "identity", fill = "steelblue") +  # Create bars
+  coord_flip() +  # Flip the chart to make labels readable
+  labs(title = "Hospital Admissions by ICD-10 Chapter",
+       x = "Disease Group",
+       y = "Number of Admissions") +  # Title and axis labels
+  theme_minimal()  # Use a clean visual theme
+:::
+
+::: write_speak
+### Step 8: Events vs Patients (The First Hint)
+Before we finish, look at this. Does a high number of admissions mean a disease affects many people, or just that a few people are coming back repeatedly?
+
+::: webr
+# Compare counts for Chapter 'I' (Circulatory)
+circ_data <- subset(hospital_data, chapter == "I")  # Keep only rows where the chapter is I (Circulatory)
+
+print(paste("Admissions for Circulatory:", nrow(circ_data)))  # How many admission events?
+print(paste("Unique Patients for Circulatory:", length(unique(circ_data$patient_id))))  # How many different patients?
+:::
+
+::: question
+Why might the number of admissions be much higher than the number of unique patients for a specific disease chapter?
+* Because patients with chronic conditions often have multiple hospital stays.
+- Because the ICD-10 codes are incorrect.
+- Because R is double-counting the rows.
+
+
+::: write
+### Summary of Lecture 1
+* **Registry Row:** In this dataset, 1 row = 1 admission event.
+* **ICD-10:** Use the first letter to aggregate detailed codes into Chapters.
+* **Workflow:** Count $\rightarrow$ Label $\rightarrow$ Visualize.
+* **Key Insight:** Total admissions $\neq$ Total patients.
+
+::: write_speak
+In the next lecture, we will tackle the "Patient Perspective." We'll learn how to filter our data so we only look at the *first* time a patient was admitted, which is how we calculate **Incidence**.
+
+Would you like me to generate the script for Lecture 2, focusing on patient-level filtering and demographics?

@@ -1,0 +1,30 @@
+::: defaults(skin="playful", dim=true)
+
+
+::: new_page
+Introduction
+
+::: write_speak
+# Explainer quick start
+This player reads a **sequence of commands** and renders text, drawings, code, and interactive elements as a lecture.
+
+::: write
+**Main elements you can use**
+- `write` / `write_speak`
+- `speak`
+- `draw` / `new_drawing`
+- `webr`, `pyodide`, `js` (aliases: `python`, `r`)
+- `mermaid`, `p5`
+- `html`, `img`, `video`, `youtube`, `accordion`, `link`
+- `message`, `question`
+
+::: message(level="note")
+Use the address bar above to load a local file, a URL, or a short id.
+
+::: write
+**Sources supported**
+- JSON arrays (flat command list, optional first `defaults`)
+- Plain text using `:::` blocks (parsed by the built-in parser)
+
+::: write_speak
+That's it. Load an example to explore the features in depth.
