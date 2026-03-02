@@ -150,4 +150,6 @@ Her ser du typisk dplyr + ggplot2: først rydde og telle med count() og slice_he
 
 Med base R bruker du read.csv(), table(), order(), hist() og barplot(). Det fungerer fint. Med dplyr og ggplot2 bruker du read.csv() eller read_csv() til innlasting, deretter count(), mutate(), ggplot() og geom_*(). Koden blir ofte kortere og mer lesbar, og du får en konsistent måte å jobbe på – spesielt når datasettet vokser eller du skal dele kode med andre. Begge veier er gyldig; bibliotekene er verktøy for å jobbe raskere og tydeligere.
 
-::: tutorial_link(url=https://xplainer.app#r103.txt, text="Neste leksjon: Filtrere, gruppere og oppsummere (r103)")
+::: link
+https://xplainer.app#r103.txt
+Neste leksjon: Filtrere, gruppere og oppsummere (r103)
