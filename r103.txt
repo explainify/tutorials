@@ -120,4 +120,7 @@ Samme tabell, to ulike plot: først antall innleggelser, deretter gjennomsnittli
 
 Du kan nå filtrere med filter(), velge kolonner med select(), gruppere med group_by() og oppsummere med summarise(). Kjeden filter → group_by → summarise → ggplot er svært vanlig i helsedataanalyse. Korte, tydelige steg gjør koden enkel å lese og endre.
 
-::: tutorial_link(url=https://xplainer.app#r105.txt, text="Neste leksjon: Hendelsesdata vs. personnivå (r105)")
+::: link
+https://xplainer.app#r104
+Neste leksjon: Hendelsesdata vs. personnivå (r104)
+
