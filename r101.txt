@@ -95,5 +95,8 @@ barplot(top10, names.arg = names(top10), horiz = TRUE, las = 1,
 ## Oppsummering
 Du kan nå laste data (((!english!))read.csv), gi ting navn (<-), se variabler (((!english!))names/str), lage nye variabler (f.eks. npr$LIGGETID <- ...), telle med ((!english!))table(), sortere med ((!english!))order() og lage figurer (((!english!))hist, ((!english!))barplot).
 
-::: tutorial_link(url=https://xplainer.app#r102.txt, text="Neste leksjon: R med dplyr og ggplot2 (r102)")
+::: link
+https://xplainer.app#r102
+Neste leksjon: R med dplyr og ggplot2 (r102)
+
 
